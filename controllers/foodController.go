@@ -204,4 +204,3 @@ func UpdateFood() gin.HandlerFunc {
 		c.JSON(http.StatusOK, result)
 	}
 }
-Footer
