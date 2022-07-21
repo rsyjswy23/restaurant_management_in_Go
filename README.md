@@ -177,18 +177,16 @@ User can view all food items.
   ```
 
 ## MongoDB Schema & Data Models:
-
-
+![Untitled Diagram drawio](https://user-images.githubusercontent.com/101481587/180132592-9ea68fc6-bc53-4f32-aa32-27c0b1692b96.svg)
 
 ## Implementaton Details:
 ### About Gin:
 
 ### About MongoDB:
 - Aggregation Pipeline:
-![Screen Shot 2022-07-18 at 5 06 13 PM](https://user-images.githubusercontent.com/101481587/180128647-0d01975f-d770-4d82-98a3-8fb721e996a7.jpg)
+![Screen Shot 2022-07-18 at 5 06 13 PM](https://user-images.githubusercontent.com/101481587/180132440-8692d631-5f39-4b9d-8838-40485f5d8f7b.jpg)
 
 ### About JWT:
-![jwt-algo](https://user-images.githubusercontent.com/101481587/180128861-12c9340c-b5a0-42ec-be7f-692b0391e432.svg)
-
+![jwt-algo](https://user-images.githubusercontent.com/101481587/180132516-8a55614a-7440-4b97-97dc-9b0f34f6f79a.svg)
 
 
