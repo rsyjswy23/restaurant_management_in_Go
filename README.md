@@ -285,7 +285,6 @@ Extract variables from route name & URL parameters in ```foodRouter.go``` & ```f
     return OrderItems, err
   }
   ```
-### About JWT:
+### About JWT: [docs](https://www.sohamkamani.com/golang/jwt-authentication/)
 <img src="https://user-images.githubusercontent.com/101481587/180132516-8a55614a-7440-4b97-97dc-9b0f34f6f79a.svg" width="500" height="600">
-
 
