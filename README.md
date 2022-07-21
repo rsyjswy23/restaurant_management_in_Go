@@ -180,13 +180,112 @@ User can view all food items.
 ![Untitled Diagram drawio](https://user-images.githubusercontent.com/101481587/180132592-9ea68fc6-bc53-4f32-aa32-27c0b1692b96.svg)
 
 ## Implementaton Details:
-### About Gin:
-
+### About Gin: [docs] (https://gin-gonic.com/docs/quickstart/)
+It's fast and has minimal memory allocation which can reduce the amount of runtime overhead from garbage collection. 
+Example of creating Gin router in ```main.go```:
+  ```
+  func main() {
+	  port := os.Getenv("PORT")
+	  if port == "" {
+		  port = "8000"
+	  }
+	  router := gin.New()
+	  router.Use(gin.Logger())
+	  routes.FoodRoutes(router)
+	  router.Run(":" + port)
+  }
+  ```
+Extract variables from route name & URL parameters in ```foodRouter.go``` & ```foodController.go```
+  ```
+  func FoodRoutes(incomingRoutes *gin.Engine) {
+	  incomingRoutes.GET("/foods", controller.GetFoods()) 
+	  incomingRoutes.GET("/foods/:food_id", controller.GetFood()) 
+	  incomingRoutes.POST("/foods", controller.CreateFood())
+	  incomingRoutes.PATCH("/foods/:food_id", controller.UpdateFood())
+  }
+  ```
+  ```
+  func GetFood() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		foodId := c.Param("food_id")
+		var food models.Food
+		// need .Decode(&food) translate data from Mongodb to golang
+		err := foodCollection.FindOne(ctx, bson.M{"food_id": foodId}).Decode(&food)
+		defer cancel()
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "error occured while fetching the food item"})
+		}
+		c.JSON(http.StatusOK, food)
+	}
+}
+  ```
 ### About MongoDB:
-- Aggregation Pipeline:
+- [Aggregation Pipeline](https://www.mongodb.com/docs/manual/core/aggregation-pipeline/): 
 ![Screen Shot 2022-07-18 at 5 06 13 PM](https://user-images.githubusercontent.com/101481587/180132440-8692d631-5f39-4b9d-8838-40485f5d8f7b.jpg)
+- [Aggregation Operator](https://www.mongodb.com/docs/manual/reference/operator/aggregation/): $sum, $push, $slice,
+- In Mongodb, [$lookup](https://www.mongodb.com/docs/manual/reference/operator/aggregation/lookup/) is similar to join operation in SQL. On ```OrderItemController.go```, there are 3 $lookup & [$unwind](https://www.mongodb.com/docs/manual/reference/operator/aggregation/unwind/) to perform:
+    1. join orderItem & food using food_id to lookup food record
+    2. join orderItem & order using order_id to lookup order record
+    3. join order & table using table_id to lookup table record
+  ```
+  func ItemsByOrder(id string) (OrderItems []primitive.M, err error) {
+    var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+    // 1st lookup
+    matchStage := bson.D{{"$match", bson.D{{"order_id", id}}}}
+    lookupStage := bson.D{{"$lookup", bson.D{{"from", "food"}, {"localField", "food_id"}, {"foreignField", "food_id"}, {"as", "food"}}}}
+    unwindStage := bson.D{{"$unwind", bson.D{{"path", "$food"}, {"preserveNullAndEmptyArrays", true}}}}
+    // 2nd lookup
+    lookupOrderStage := bson.D{{"$lookup", bson.D{{"from", "order"}, {"localField", "order_id"}, {"foreignField", "order_id"}, {"as", "order"}}}}
+    unwindOrderStage := bson.D{{"$unwind", bson.D{{"path", "$order"}, {"preserveNullAndEmptyArrays", true}}}}
+    // 3th lookup
+    lookupTableStage := bson.D{{"$lookup", bson.D{{"from", "table"}, {"localField", "order.table_id"}, {"foreignField", "table_id"}, {"as", "table"}}}}
+    unwindTableStage := bson.D{{"$unwind", bson.D{{"path", "$table"}, {"preserveNullAndEmptyArrays", true}}}}
 
+    projectStage := bson.D{
+      {"$project", bson.D{
+        {"id", 0},
+        {"amount", "$food.price"},
+        {"total_count", 1},
+        {"food_name", "$food.name"},
+        {"food_image", "$food.food_image"},
+        {"table_number", "$table.table_number"},
+        {"table_id", "$table.table_id"},
+        {"order_id", "$order.order_id"},
+        {"price", "$food.price"},
+        {"quantity", 1},
+      }}}
+    groupStage := bson.D{{"$group", bson.D{{"_id", bson.D{{"order_id", "$order_id"}, {"table_id", "$table_id"}, {"table_number", "$table_number"}}}, {"payment_due", bson.D{{"$sum", "$amount"}}}, {"total_count", bson.D{{"$sum", 1}}}, {"order_items", bson.D{{"$push", "$$ROOT"}}}}}}
+    projectStage2 := bson.D{
+      {"$project", bson.D{
+        {"id", 0},
+        {"payment_due", 1},
+        {"total_count", 1},
+        {"table_number", "$_id.table_number"},
+        {"order_items", 1},
+      }}}
+    result, err := orderItemCollection.Aggregate(ctx, mongo.Pipeline{
+      matchStage,
+      lookupStage,
+      unwindStage,
+      lookupOrderStage,
+      unwindOrderStage,
+      lookupTableStage,
+      unwindTableStage,
+      projectStage,
+      groupStage,
+      projectStage2})
+    if err != nil {
+      panic(err)
+    }
+    if err = result.All(ctx, &OrderItems); err != nil {
+      panic(err)
+    }
+    defer cancel()
+    return OrderItems, err
+  }
+  ```
 ### About JWT:
-![jwt-algo](https://user-images.githubusercontent.com/101481587/180132516-8a55614a-7440-4b97-97dc-9b0f34f6f79a.svg)
+<img src="https://user-images.githubusercontent.com/101481587/180132516-8a55614a-7440-4b97-97dc-9b0f34f6f79a.svg" width="500" height="600">
 
 
