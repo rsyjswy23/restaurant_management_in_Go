@@ -10,10 +10,9 @@ This backend restaurant management system consists of 6 services:
 
 ## Tech Stack & Tools:
 * Go 
-* Gin web framework
-* MongoDB
-* JWT 
-* Postman
+* Gin web framework (routes-controllers-models)
+* MongoDB (aggregaton pipeline)
+* JWT (RSA signing method RS256)
 
 ## Demo:
 User Signup:
@@ -185,8 +184,11 @@ User can view all food items.
 ### About Gin:
 
 ### About MongoDB:
+- Aggregation Pipeline:
+![Screen Shot 2022-07-18 at 5 06 13 PM](https://user-images.githubusercontent.com/101481587/180128647-0d01975f-d770-4d82-98a3-8fb721e996a7.jpg)
 
 ### About JWT:
+![jwt-algo](https://user-images.githubusercontent.com/101481587/180128861-12c9340c-b5a0-42ec-be7f-692b0391e432.svg)
 
 
 
