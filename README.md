@@ -14,6 +14,9 @@ This backend restaurant management system consists of 6 services:
 * MongoDB (aggregaton pipeline)
 * JWT (RSA signing method RS256)
 
+## MongoDB Schema & Data Models:
+![Untitled Diagram drawio](https://user-images.githubusercontent.com/101481587/180132592-9ea68fc6-bc53-4f32-aa32-27c0b1692b96.svg)
+
 ## Demo:
 User Signup:
 
@@ -175,9 +178,6 @@ User can view all food items.
     "total_count": 3
   }
   ```
-
-## MongoDB Schema & Data Models:
-![Untitled Diagram drawio](https://user-images.githubusercontent.com/101481587/180132592-9ea68fc6-bc53-4f32-aa32-27c0b1692b96.svg)
 
 ## Implementaton Details:
 ### About Gin: [docs] (https://gin-gonic.com/docs/quickstart/)
